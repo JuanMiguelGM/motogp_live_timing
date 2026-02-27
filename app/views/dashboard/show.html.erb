@@ -1,0 +1,30 @@
+<% if @session %>
+  <div class="flex flex-col h-full" data-controller="timing-tower track-map live-session"
+       data-timing-tower-session-id-value="<%= @session.id %>"
+       data-track-map-session-id-value="<%= @session.id %>"
+       data-live-session-session-id-value="<%= @session.id %>"
+       data-live-session-live-value="<%= @session.status == 'live' %>">
+
+    <div class="flex flex-col lg:flex-row grow overflow-hidden">
+      <%# Track Map %>
+      <div class="h-64 lg:h-auto lg:w-3/5 p-4 overflow-hidden relative" data-track-map-target="container">
+        <%= render "shared/track_map", session: @session, bike_positions: @bike_positions %>
+      </div>
+
+      <%# Timing Tower %>
+      <div class="lg:w-2/5 border-t lg:border-t-0 lg:border-l border-gray-800 overflow-y-auto" data-timing-tower-target="container">
+        <%= render "shared/timing_tower", timing_entries: @timing_entries %>
+      </div>
+    </div>
+
+    <%# Bottom panel — Race Direction (full width, no team radio) %>
+    <div class="border-t border-gray-800 shrink-0">
+      <%= render "shared/race_direction_feed", messages: @race_direction_messages %>
+    </div>
+  </div>
+<% else %>
+  <%= render "dashboard/off_session",
+             last_session: @last_session,
+             last_results: @last_results,
+             next_session: @next_session %>
+<% end %>

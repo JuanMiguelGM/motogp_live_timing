@@ -1,0 +1,14 @@
+<div data-controller="weather" class="flex items-center gap-3 text-xs text-gray-500"
+     data-weather-target="container">
+  <% if defined?(weather) && weather %>
+    <span data-weather-target="airTemp">Air <%= weather.air_temperature %>&deg;C</span>
+    <span data-weather-target="trackTemp">Track <%= weather.track_temperature %>&deg;C</span>
+    <span data-weather-target="humidity"><%= weather.humidity.to_i %>% RH</span>
+    <span data-weather-target="wind">Wind <%= weather.wind_speed %> m/s</span>
+    <% if weather.rainfall.to_i.positive? %>
+      <span data-weather-target="rain" class="text-blue-400">RAIN</span>
+    <% else %>
+      <span data-weather-target="rain" class="hidden text-blue-400">RAIN</span>
+    <% end %>
+  <% end %>
+</div>

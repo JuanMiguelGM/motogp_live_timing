@@ -1,0 +1,15 @@
+<%
+  badge_classes = case session.status
+                  when "live"
+                    "bg-green-600 text-white animate-pulse"
+                  when "finished"
+                    "bg-gray-700 text-gray-300"
+                  when "upcoming"
+                    "bg-yellow-600 text-white"
+                  else
+                    "bg-gray-700 text-gray-400"
+                  end
+%>
+<span class="px-2 py-0.5 rounded text-xs font-bold uppercase <%= badge_classes %>">
+  <%= session.status %>
+</span>

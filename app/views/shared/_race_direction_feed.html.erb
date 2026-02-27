@@ -1,0 +1,17 @@
+<div data-controller="race-direction" class="border-t border-gray-800 bg-gray-950">
+  <div class="flex items-center justify-between px-3 py-1.5 border-b border-gray-800/50">
+    <span class="text-gray-500 text-xs uppercase tracking-wider font-bold">Race Direction</span>
+    <button data-action="click->race-direction#toggle" data-race-direction-target="toggleBtn"
+            class="text-gray-600 hover:text-gray-400 text-xs">Hide</button>
+  </div>
+
+  <div data-race-direction-target="feed" class="max-h-32 overflow-y-auto px-3 py-1">
+    <% if defined?(messages) && messages&.any? %>
+      <% messages.each do |msg| %>
+        <%= render "shared/race_direction_message", message: msg %>
+      <% end %>
+    <% else %>
+      <p class="text-gray-600 text-xs py-1">No race direction messages yet.</p>
+    <% end %>
+  </div>
+</div>

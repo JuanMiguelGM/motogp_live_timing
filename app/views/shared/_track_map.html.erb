@@ -1,0 +1,116 @@
+<% circuit = session.event&.circuit %>
+
+<div class="h-full flex items-center justify-center">
+  <% if circuit&.svg_data.present? && circuit&.track_coordinates_json.present? %>
+    <% coordinates = JSON.parse(circuit.track_coordinates_json) %>
+    <% bounds = track_map_bounds(coordinates) %>
+
+    <svg viewBox="0 0 <%= bounds[:width] %> <%= bounds[:height] %>"
+         class="w-full h-full max-h-full"
+         preserveAspectRatio="xMidYMid meet"
+         data-track-map-target="svg">
+
+      <%# Track outer edge %>
+      <path d="<%= circuit.svg_data %>"
+            fill="none"
+            stroke="#1f2937"
+            stroke-width="16"
+            stroke-linecap="round"
+            stroke-linejoin="round" />
+
+      <%# Track surface %>
+      <path d="<%= circuit.svg_data %>"
+            fill="none"
+            stroke="#4B5563"
+            stroke-width="12"
+            stroke-linecap="round"
+            stroke-linejoin="round" />
+
+      <%# Center line (dashed) %>
+      <path d="<%= circuit.svg_data %>"
+            fill="none"
+            stroke="#9CA3AF"
+            stroke-width="1"
+            stroke-dasharray="8,6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            opacity="0.5" />
+
+      <% if coordinates.length >= 2 %>
+        <% p0 = coordinates.first %>
+        <% p1 = coordinates[1] %>
+        <% dx = (p1['x'] || p1[:x]).to_f - (p0['x'] || p0[:x]).to_f %>
+        <% dy = (p1['y'] || p1[:y]).to_f - (p0['y'] || p0[:y]).to_f %>
+        <% len = Math.sqrt(dx * dx + dy * dy) %>
+        <% if len > 0 %>
+          <% nx = -dy / len %>
+          <% ny = dx / len %>
+          <% sx = (p0['x'] || p0[:x]).to_f %>
+          <% sy = (p0['y'] || p0[:y]).to_f %>
+          <% line_len = 14 %>
+
+          <%# Start/finish line %>
+          <line x1="<%= (sx - nx * line_len).round(1) %>"
+                y1="<%= (sy - ny * line_len).round(1) %>"
+                x2="<%= (sx + nx * line_len).round(1) %>"
+                y2="<%= (sy + ny * line_len).round(1) %>"
+                stroke="#FFFFFF"
+                stroke-width="3"
+                stroke-linecap="round" />
+
+          <%# Direction arrow at ~25% around the track %>
+          <% arrow_idx = [coordinates.length / 4, 1].max %>
+          <% ap0 = coordinates[[arrow_idx - 1, 0].max] %>
+          <% ap1 = coordinates[arrow_idx] %>
+          <% adx = (ap1['x'] || ap1[:x]).to_f - (ap0['x'] || ap0[:x]).to_f %>
+          <% ady = (ap1['y'] || ap1[:y]).to_f - (ap0['y'] || ap0[:y]).to_f %>
+          <% alen = Math.sqrt(adx * adx + ady * ady) %>
+          <% if alen > 0 %>
+            <% udx = adx / alen %>
+            <% udy = ady / alen %>
+            <% ax = (ap1['x'] || ap1[:x]).to_f %>
+            <% ay = (ap1['y'] || ap1[:y]).to_f %>
+            <% arrow_size = 8 %>
+            <polygon points="<%= (ax + udx * arrow_size).round(1) %>,<%= (ay + udy * arrow_size).round(1) %> <%= (ax - udx * arrow_size - udy * arrow_size * 0.6).round(1) %>,<%= (ay - udy * arrow_size + udx * arrow_size * 0.6).round(1) %> <%= (ax - udx * arrow_size + udy * arrow_size * 0.6).round(1) %>,<%= (ay - udy * arrow_size - udx * arrow_size * 0.6).round(1) %>"
+                     fill="#9CA3AF"
+                     opacity="0.7" />
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <%# Bike positions %>
+      <% bike_positions.each do |bp| %>
+        <% norm = normalize_bike_position(bp, circuit) %>
+        <% next unless norm %>
+
+        <g data-track-map-target="car"
+           data-rider-number="<%= bp.rider.number %>"
+           transform="translate(<%= norm[:x].round(1) %>, <%= norm[:y].round(1) %>)"
+           class="transition-transform duration-500 ease-linear">
+
+          <%# Bike dot %>
+          <circle r="8"
+                  fill="#<%= bp.rider.team.colour %>"
+                  stroke="#000"
+                  stroke-width="1.5"
+                  opacity="0.95" />
+
+          <%# Rider number %>
+          <text text-anchor="middle"
+                dominant-baseline="central"
+                fill="white"
+                font-size="7"
+                font-weight="bold"
+                font-family="monospace">
+            <%= bp.rider.number %>
+          </text>
+        </g>
+      <% end %>
+    </svg>
+  <% else %>
+    <div class="text-center text-gray-500">
+      <p class="text-lg mb-2">Track map not available</p>
+      <p class="text-sm">Run <code class="text-gray-400">TrackMapBuilder.new.call(session: session)</code> to generate</p>
+    </div>
+  <% end %>
+</div>

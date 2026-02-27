@@ -1,0 +1,102 @@
+<div class="h-full overflow-y-auto" data-controller="countdown session-poll"
+     data-countdown-target-value="<%= next_session&.start_date&.iso8601 %>"
+     data-session-poll-interval-value="30">
+
+  <div class="max-w-4xl mx-auto p-6">
+
+    <%# Next session countdown %>
+    <% if next_session %>
+      <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 mb-6 text-center">
+        <p class="text-gray-500 text-sm uppercase tracking-wider mb-2">Next Session</p>
+        <h2 class="text-white text-2xl font-bold mb-1">
+          <%= next_session.event&.name %> &mdash; <%= next_session.session_type %>
+        </h2>
+        <p class="text-gray-400 text-sm mb-4">
+          <%= next_session.event&.circuit&.name %>, <%= next_session.event&.circuit&.country %>
+        </p>
+
+        <% if next_session.start_date %>
+          <div class="flex justify-center gap-4 mb-3" data-countdown-target="display">
+            <div class="bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 min-w-[5rem]">
+              <span class="text-white text-2xl font-bold" data-countdown-target="days">--</span>
+              <p class="text-gray-500 text-xs uppercase mt-1">Days</p>
+            </div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 min-w-[5rem]">
+              <span class="text-white text-2xl font-bold" data-countdown-target="hours">--</span>
+              <p class="text-gray-500 text-xs uppercase mt-1">Hours</p>
+            </div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 min-w-[5rem]">
+              <span class="text-white text-2xl font-bold" data-countdown-target="minutes">--</span>
+              <p class="text-gray-500 text-xs uppercase mt-1">Min</p>
+            </div>
+            <div class="bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 min-w-[5rem]">
+              <span class="text-white text-2xl font-bold" data-countdown-target="seconds">--</span>
+              <p class="text-gray-500 text-xs uppercase mt-1">Sec</p>
+            </div>
+          </div>
+
+          <p class="text-gray-500 text-xs">
+            <%= local_time(next_session.start_date, format: :full) %>
+          </p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Last session results %>
+    <% if last_session %>
+      <div class="bg-gray-900 border border-gray-800 rounded-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <p class="text-gray-500 text-sm uppercase tracking-wider mb-1">Last Session</p>
+            <h2 class="text-white text-lg font-bold">
+              <%= last_session.event&.name %> &mdash; <%= last_session.session_type %>
+            </h2>
+          </div>
+          <%= link_to "Full Results &rarr;".html_safe,
+                      session_path(last_session),
+                      class: "text-gray-400 hover:text-gray-200 text-sm" %>
+        </div>
+
+        <% if last_results&.any? %>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-gray-500 text-xs uppercase tracking-wider border-b border-gray-800">
+                <th class="text-left py-2 w-8">P</th>
+                <th class="text-left py-2">Rider</th>
+                <th class="text-left py-2">Team</th>
+                <th class="text-right py-2">Gap</th>
+                <th class="text-right py-2">Best Lap</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% last_results.each do |entry| %>
+                <tr class="border-b border-gray-800/50 hover:bg-gray-900/50">
+                  <td class="py-2 text-white font-bold"><%= entry.position %></td>
+                  <td class="py-2">
+                    <%= team_color_dot(entry.rider.team) %>
+                    <span class="text-white font-bold"><%= entry.rider.name_acronym %></span>
+                    <span class="text-gray-500 text-xs ml-1"><%= entry.rider.full_name %></span>
+                  </td>
+                  <td class="py-2 text-gray-400 text-xs"><%= entry.rider.team.name %></td>
+                  <td class="py-2 text-right text-gray-300"><%= format_gap(entry.gap_to_leader) %></td>
+                  <td class="py-2 text-right text-gray-300 font-mono"><%= entry.best_lap_time || '-' %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <p class="text-gray-500">No timing data available for this session.</p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# No data at all %>
+    <% if last_session.nil? && next_session.nil? %>
+      <div class="text-center py-16">
+        <h1 class="text-2xl font-bold text-gray-400 mb-2">No Session Data</h1>
+        <p class="text-gray-500 mb-4">Sync data from MotoGP API to get started.</p>
+        <code class="text-sm text-gray-600">rake motogp:sync_season[<%= Time.current.year %>]</code>
+      </div>
+    <% end %>
+  </div>
+</div>

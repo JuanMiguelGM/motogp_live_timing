@@ -1,0 +1,55 @@
+<% content_for(:title) { "#{@event.name} | MotoGP Live Timing" } %>
+
+<div class="p-6 max-w-4xl mx-auto">
+  <div class="mb-6">
+    <%= link_to "&larr; Calendar".html_safe, events_path, class: "text-gray-500 hover:text-gray-300 text-sm" %>
+  </div>
+
+  <h1 class="text-2xl font-bold text-white mb-1"><%= @event.name %></h1>
+  <p class="text-gray-400 text-sm mb-6">
+    <%= @event.circuit&.name %>, <%= @event.circuit&.country %>
+    <% if @event.start_date %>
+      &middot; <%= local_time(@event.start_date, format: :date) %>
+    <% end %>
+  </p>
+
+  <% if @sessions.any? %>
+    <div class="space-y-3">
+      <% @sessions.each do |session| %>
+        <div class="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+          <%= link_to session_path(session), class: "block p-4 hover:bg-gray-800/30 transition-colors" do %>
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-white font-bold"><%= session.session_type %></span>
+                <% if session.start_date %>
+                  <span class="text-gray-500 text-sm ml-2">
+                    <%= local_time(session.start_date, format: :day_time) %>
+                  </span>
+                <% end %>
+              </div>
+              <%= render "shared/session_status_badge", session: session %>
+            </div>
+          <% end %>
+
+          <%# Show top 3 for finished sessions %>
+          <% if session.status == 'finished' %>
+            <% top3 = session.timing_entries.sort_by { |e| e.position || Float::INFINITY }.first(3) %>
+            <% if top3.any? %>
+              <div class="px-4 pb-3 flex items-center gap-4 text-xs">
+                <% top3.each_with_index do |entry, idx| %>
+                  <div class="flex items-center gap-1">
+                    <span class="text-gray-500 font-bold">P<%= idx + 1 %></span>
+                    <%= team_color_dot(entry.rider.team) %>
+                    <span class="text-gray-300 font-bold"><%= entry.rider.name_acronym %></span>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-gray-500">No sessions synced yet.</p>
+  <% end %>
+</div>

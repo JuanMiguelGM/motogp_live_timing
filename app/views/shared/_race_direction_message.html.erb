@@ -1,0 +1,11 @@
+<div class="flex items-start gap-2 py-0.5 text-xs race-direction-msg">
+  <span class="text-gray-600 whitespace-nowrap shrink-0">
+    <%= local_time(message.recorded_at, format: :time) %>
+  </span>
+  <% if message.flag.present? %>
+    <span class="font-bold shrink-0 <%= flag_message_class(message.flag) %>">
+      <%= message.flag %>
+    </span>
+  <% end %>
+  <span class="text-gray-300"><%= message.message %></span>
+</div>

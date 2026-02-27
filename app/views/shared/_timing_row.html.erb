@@ -1,0 +1,74 @@
+<tr class="border-b border-gray-800/50 hover:bg-gray-900/50 transition-colors"
+    data-rider-number="<%= entry.rider.number %>"
+    style="<%= team_color_style(entry.rider.team) %>">
+  <%# Position %>
+  <td class="py-1.5 px-1 text-center font-bold text-gray-200">
+    <%= entry.position %>
+  </td>
+
+  <%# Rider %>
+  <td class="py-1.5 px-2 text-left">
+    <div class="flex items-center gap-1">
+      <%= team_color_dot(entry.rider.team) %>
+      <span class="font-bold text-white"><%= entry.rider.name_acronym %></span>
+      <span class="text-gray-500 text-[10px]"><%= entry.rider.number %></span>
+    </div>
+  </td>
+
+  <%# Interval %>
+  <td class="py-1.5 px-1 text-right text-gray-300">
+    <%= format_interval(entry.interval) %>
+  </td>
+
+  <%# Gap to leader %>
+  <td class="py-1.5 px-1 text-right text-gray-400">
+    <%= format_gap(entry.gap_to_leader) %>
+  </td>
+
+  <%# Last lap %>
+  <td class="py-1.5 px-1 text-right text-gray-300">
+    <%= entry.last_lap_time %>
+  </td>
+
+  <%# Best lap %>
+  <td class="py-1.5 px-1 text-right text-purple-400">
+    <%= entry.best_lap_time %>
+  </td>
+
+  <%# Sectors %>
+  <% (1..3).each do |s| %>
+    <td class="py-1.5 px-1 text-right <%= sector_color_class(entry, s) %>">
+      <%= entry.send(:"sector_#{s}_time") %>
+    </td>
+  <% end %>
+
+  <%# Tire %>
+  <td class="py-1.5 px-1 text-center">
+    <span class="<%= tire_compound_class(entry.tire_compound) %> font-bold">
+      <%= tire_short_name(entry.tire_compound) %>
+    </span>
+    <% if entry.tire_age %>
+      <span class="text-gray-600 text-[10px]"><%= entry.tire_age %></span>
+    <% end %>
+  </td>
+
+  <%# Pit stops %>
+  <td class="py-1.5 px-1 text-center text-gray-400">
+    <%= entry.pit_stop_count || 0 %>
+  </td>
+
+  <%# Top speed %>
+  <td class="py-1.5 px-1 text-right text-gray-400">
+    <%= entry.top_speed ? number_with_precision(entry.top_speed, precision: 0) : '-' %>
+  </td>
+
+  <%# Laps %>
+  <td class="py-1.5 px-1 text-right text-gray-400">
+    <%= entry.total_laps || '-' %>
+  </td>
+
+  <%# Status %>
+  <td class="py-1.5 px-1 text-center text-gray-500 text-[10px] uppercase">
+    <%= entry.status %>
+  </td>
+</tr>

@@ -1,0 +1,63 @@
+<% content_for(:title) { "#{@season&.year || 'Season'} Calendar | MotoGP Live Timing" } %>
+
+<div class="p-6 max-w-6xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-white">
+      <%= @season&.year %> MotoGP Calendar
+    </h1>
+    <% if @season %>
+      <span class="text-gray-500 text-sm">
+        <%= @events.size %> Grand<%= @events.size == 1 ? '' : 's' %> Prix
+      </span>
+    <% end %>
+  </div>
+
+  <% if @events.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <% @events.each do |event| %>
+        <% status = event_time_status(event) %>
+        <%= link_to event_path(event),
+            class: "block bg-gray-900 border rounded-lg p-4 transition-colors #{status == :past ? 'border-gray-800/50 opacity-75 hover:opacity-100 hover:border-gray-600' : 'border-gray-800 hover:border-gray-600'}" do %>
+
+          <div class="flex items-start justify-between mb-2">
+            <h2 class="text-white font-bold"><%= event.name %></h2>
+            <span class="text-gray-500 text-xs"><%= event.circuit&.country %></span>
+          </div>
+
+          <p class="text-gray-400 text-sm mb-3"><%= event.circuit&.name %></p>
+
+          <div class="flex items-center justify-between">
+            <span class="text-gray-500 text-xs">
+              <% if event.start_date %>
+                <%= local_time(event.start_date, format: :short_date) %>
+                <% if event.end_date && event.end_date != event.start_date %>
+                  - <%= local_time(event.end_date, format: :short_date) %>
+                <% end %>
+              <% end %>
+            </span>
+
+            <% if status == :past %>
+              <span class="text-gray-600 text-xs uppercase">Completed</span>
+            <% elsif status == :live %>
+              <span class="text-green-400 text-xs uppercase font-bold animate-pulse">Live</span>
+            <% else %>
+              <span class="text-yellow-400 text-xs uppercase">Upcoming</span>
+            <% end %>
+          </div>
+
+          <% winner = event_winner(event) %>
+          <% if winner %>
+            <div class="mt-3 pt-3 border-t border-gray-800/50 flex items-center gap-2">
+              <%= team_color_dot(winner.rider.team) %>
+              <span class="text-gray-400 text-xs">
+                Winner: <span class="text-white font-bold"><%= winner.rider.name_acronym %></span>
+              </span>
+            </div>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-gray-500">No event data available. Run <code class="text-gray-400">rake motogp:sync_season</code> to sync.</p>
+  <% end %>
+</div>

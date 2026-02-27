@@ -1,0 +1,27 @@
+<div class="overflow-x-auto">
+<table class="w-full text-xs min-w-[720px]">
+  <thead class="sticky top-0 bg-gray-900 z-10">
+    <tr class="text-gray-500 uppercase tracking-wider border-b border-gray-800">
+      <th class="py-2 px-1 text-center w-8">P</th>
+      <th class="py-2 px-2 text-left">Rider</th>
+      <th class="py-2 px-1 text-right">Int</th>
+      <th class="py-2 px-1 text-right">Gap</th>
+      <th class="py-2 px-1 text-right">Last</th>
+      <th class="py-2 px-1 text-right">Best</th>
+      <th class="py-2 px-1 text-right">S1</th>
+      <th class="py-2 px-1 text-right">S2</th>
+      <th class="py-2 px-1 text-right">S3</th>
+      <th class="py-2 px-1 text-center">Tire</th>
+      <th class="py-2 px-1 text-center">Pit</th>
+      <th class="py-2 px-1 text-right">Spd</th>
+      <th class="py-2 px-1 text-right">Laps</th>
+      <th class="py-2 px-1 text-center">Status</th>
+    </tr>
+  </thead>
+  <tbody data-timing-tower-target="tbody">
+    <% timing_entries.each do |entry| %>
+      <%= render "shared/timing_row", entry: entry %>
+    <% end %>
+  </tbody>
+</table>
+</div>
