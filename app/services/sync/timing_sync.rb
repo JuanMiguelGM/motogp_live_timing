@@ -38,16 +38,19 @@ module Sync
 
     def entry_attributes(classification)
       gap_data = classification['gap']
+      best_lap_time = classification.dig('best_lap', 'time')
+      race_time = classification['time']
+
       {
         position: classification['position'],
         gap_to_leader: format_gap_to_leader(gap_data),
         interval: format_interval_gap(gap_data),
-        last_lap_time: format_time(classification.dig('best_lap', 'time')),
-        best_lap_time: format_time(classification.dig('best_lap', 'time')),
+        last_lap_time: format_time(best_lap_time || race_time),
+        best_lap_time: format_time(best_lap_time || race_time),
         best_lap_number: classification.dig('best_lap', 'number'),
         total_laps: classification['total_laps'],
-        top_speed: classification['top_speed'],
-        speed_trap: classification['top_speed'],
+        top_speed: classification['top_speed'] || classification['average_speed'],
+        speed_trap: classification['top_speed'] || classification['average_speed'],
         status: classification['status'],
         pit_stop_count: classification['pit_stops'] || 0
       }

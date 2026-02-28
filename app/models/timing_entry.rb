@@ -6,5 +6,5 @@ class TimingEntry < ApplicationRecord
 
   validates :rider_id, uniqueness: { scope: :session_id }
 
-  scope :by_position, -> { order(:position) }
+  scope :by_position, -> { order(Arel.sql('position IS NULL, position ASC')) }
 end

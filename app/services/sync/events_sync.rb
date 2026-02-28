@@ -23,8 +23,8 @@ module Sync
 
       Circuit.find_or_initialize_by(api_uuid: circuit_data['id']).tap do |c|
         c.name = circuit_data['name'] || api_event['name']
-        c.country = circuit_data.dig('country', 'name')
-        c.country_iso = circuit_data.dig('country', 'iso')
+        c.country = api_event.dig('country', 'name') || circuit_data.dig('country', 'name')
+        c.country_iso = api_event.dig('country', 'iso') || circuit_data['nation']
         c.save!
       end
     end
