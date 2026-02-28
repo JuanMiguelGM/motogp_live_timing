@@ -8,7 +8,7 @@ module Sync
 
     def call(session:)
       circuit = session.event&.circuit
-      return unless circuit&.track_coordinates_json.present?
+      return if circuit&.track_coordinates_json.blank?
 
       entries = session.timing_entries.includes(rider: :team).by_position
       return if entries.empty?

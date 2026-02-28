@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class TrackMapBuilder
-  MIN_LAP_POINTS = 100
+  MIN_LAP_POINTS = 10
   MAX_SIMPLIFIED_POINTS = 120
 
   SEED_FILE = Rails.root.join('db/track_coordinates.json')
@@ -26,7 +26,7 @@ class TrackMapBuilder
 
     builder = new
     Circuit.find_each do |circuit|
-      entry = seed_data[circuit.api_uuid.to_s] || seed_data[circuit.name]
+      entry = find_seed_entry(seed_data, circuit)
       unless entry
         yield(:skip, circuit, 'no seed data') if block_given?
         next
@@ -67,10 +67,42 @@ class TrackMapBuilder
     seed_data = self.class.load_seed_file
     return nil if seed_data.nil?
 
-    entry = seed_data[circuit_api_uuid.to_s]
+    circuit = Circuit.find_by(api_uuid: circuit_api_uuid)
+    entry = circuit ? self.class.find_seed_entry(seed_data, circuit) : seed_data[circuit_api_uuid.to_s]
     return nil unless entry
 
     entry['points'].map { |p| { x: p['x'].to_f, y: p['y'].to_f } }
+  end
+
+  def self.find_seed_entry(seed_data, circuit)
+    circuit_name = circuit.name&.downcase || ''
+    # Match by key (short name), api_uuid, or fuzzy name match
+    seed_data[circuit.short_name&.downcase] ||
+      seed_data[circuit.api_uuid.to_s] ||
+      seed_data.find { |_key, entry|
+        entry_name = entry['name']&.downcase || ''
+        fuzzy_circuit_match?(circuit_name, entry_name)
+      }&.last
+  end
+
+  def self.fuzzy_circuit_match?(circuit_name, seed_name)
+    return false if circuit_name.blank? || seed_name.blank?
+
+    # Direct substring match in either direction
+    return true if circuit_name.include?(seed_name) || seed_name.include?(circuit_name)
+
+    # Normalize accents and special chars for comparison
+    normalized_circuit = circuit_name.gsub(/[áàäâ]/, 'a').gsub(/[éèëê]/, 'e').gsub(/[íìïî]/, 'i')
+                                     .gsub(/[óòöô]/, 'o').gsub(/[úùüû]/, 'u').gsub(/ñ/, 'n')
+    normalized_seed = seed_name.gsub(/[áàäâ]/, 'a').gsub(/[éèëê]/, 'e').gsub(/[íìïî]/, 'i')
+                               .gsub(/[óòöô]/, 'o').gsub(/[úùüû]/, 'u').gsub(/ñ/, 'n')
+
+    return true if normalized_circuit.include?(normalized_seed) || normalized_seed.include?(normalized_circuit)
+
+    # Check significant shared keywords (3+ chars)
+    circuit_words = normalized_circuit.scan(/[a-z]{3,}/)
+    seed_words = normalized_seed.scan(/[a-z]{3,}/)
+    (circuit_words & seed_words).length >= 2
   end
 
   def rdp_simplify(points, epsilon)

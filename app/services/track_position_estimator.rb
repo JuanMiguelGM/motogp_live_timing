@@ -45,7 +45,7 @@ class TrackPositionEstimator
 
   def spread_fraction(index, total, entry)
     gap = parse_gap(entry.gap_to_leader)
-    if gap && gap > 0
+    if gap&.positive?
       [gap / 90.0, 0.95].min
     else
       index.to_f / [total, 1].max
@@ -66,25 +66,33 @@ class TrackPositionEstimator
     return @coordinates.last if fraction >= 1
 
     target = fraction * path_length
+    walk_path_to(target)
+  end
+
+  def walk_path_to(target)
     cumulative = 0.0
 
     (1...@coordinates.length).each do |i|
-      dx = @coordinates[i][:x] - @coordinates[i - 1][:x]
-      dy = @coordinates[i][:y] - @coordinates[i - 1][:y]
-      segment_len = Math.sqrt((dx * dx) + (dy * dy))
+      segment = segment_between(i - 1, i)
+      return interpolate_point(i - 1, segment, target - cumulative) if cumulative + segment[:length] >= target
 
-      if cumulative + segment_len >= target
-        remaining = target - cumulative
-        t = segment_len.zero? ? 0 : remaining / segment_len
-        return {
-          x: @coordinates[i - 1][:x] + (t * dx),
-          y: @coordinates[i - 1][:y] + (t * dy)
-        }
-      end
-
-      cumulative += segment_len
+      cumulative += segment[:length]
     end
 
     @coordinates.last
+  end
+
+  def segment_between(from, to)
+    dx = @coordinates[to][:x] - @coordinates[from][:x]
+    dy = @coordinates[to][:y] - @coordinates[from][:y]
+    { dx: dx, dy: dy, length: Math.sqrt((dx * dx) + (dy * dy)) }
+  end
+
+  def interpolate_point(from_idx, segment, remaining)
+    t = segment[:length].zero? ? 0 : remaining / segment[:length]
+    {
+      x: @coordinates[from_idx][:x] + (t * segment[:dx]),
+      y: @coordinates[from_idx][:y] + (t * segment[:dy])
+    }
   end
 end

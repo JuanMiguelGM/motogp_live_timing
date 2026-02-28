@@ -2,32 +2,32 @@
 
 source 'https://rubygems.org'
 
-gem 'rails', '~> 8.1.2'
-gem 'propshaft'
-gem 'sqlite3', '>= 2.1'
-gem 'puma', '>= 5.0'
+gem 'bootsnap', require: false
+gem 'concurrent-ruby'
 gem 'importmap-rails'
-gem 'turbo-rails'
-gem 'stimulus-rails'
-gem 'tailwindcss-rails'
-gem 'tzinfo-data', platforms: %i[windows jruby]
+gem 'kamal', require: false
+gem 'propshaft'
+gem 'puma', '>= 5.0'
+gem 'rails', '~> 8.1.2'
 gem 'solid_cable'
 gem 'solid_cache'
 gem 'solid_queue'
-gem 'bootsnap', require: false
-gem 'kamal', require: false
+gem 'sqlite3', '>= 2.1'
+gem 'stimulus-rails'
+gem 'tailwindcss-rails'
 gem 'thruster', require: false
-gem 'concurrent-ruby'
+gem 'turbo-rails'
+gem 'tzinfo-data', platforms: %i[windows jruby]
 
 group :development, :test do
-  gem 'debug', platforms: %i[mri windows], require: 'debug/prelude'
-  gem 'bundler-audit', require: false
   gem 'brakeman', require: false
+  gem 'bundler-audit', require: false
+  gem 'debug', platforms: %i[mri windows], require: 'debug/prelude'
+  gem 'factory_bot_rails'
+  gem 'rspec-rails'
   gem 'rubocop', require: false
   gem 'rubocop-rails', require: false
   gem 'rubocop-rspec', require: false
-  gem 'factory_bot_rails'
-  gem 'rspec-rails'
 end
 
 group :development do
@@ -37,5 +37,6 @@ end
 group :test do
   gem 'capybara'
   gem 'selenium-webdriver'
+  gem 'shoulda-matchers'
   gem 'webmock'
 end
